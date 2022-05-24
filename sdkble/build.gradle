@@ -1,6 +1,49 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'maven-publish'
+}
+
+ext {
+    versionMajor = '1'
+    versionMinor = '0'
+    versionBugfix = '0'
+    versionExtra = ''
+}
+
+def githubProperties = new Properties()
+def githubPropertiesFiles = rootProject.file("github.properties")
+
+if (githubPropertiesFiles.exists())
+    githubProperties.load(new FileInputStream(githubPropertiesFiles))
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.release
+
+                // You can then customize attributes of the publication as shown below.
+                groupId = 'io.birota.zoov.sdkble'
+                artifactId = 'sdkble'
+                version = "$versionMajor.$versionMinor.$versionBugfix$versionExtra"
+
+                //artifact("$buildDir/outputs/aar/$version-release.aar")
+            }
+        }
+
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/birotaio/fifteen-android-sdk-ble-tech-test")
+                credentials {
+                    username = githubProperties['gpr.usr'] ?: System.getenv("GPR_USER")
+                    password = githubProperties['gpr.key'] ?: System.getenv("GPR_API_KEY")
+                }
+            }
+        }
+    }
 }
 
 android {
@@ -12,6 +55,14 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+
+        versionCode 1
+        versionName "$versionMajor.$versionMinor.$versionBugfix$versionExtra"
+
+        buildConfigField 'int', 'VERSION_MAJOR', versionMajor
+        buildConfigField 'int', 'VERSION_MINOR', versionMinor
+        buildConfigField 'int', 'VERSION_BUGFIX', versionBugfix
+        buildConfigField 'String', 'VERSION_EXTRA', "\"$versionExtra\""
     }
 
     buildTypes {
@@ -26,6 +77,16 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+
+    libraryVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.aar')) {
+                def fileName = "${archivesBaseName}-${version}-${variant.buildType.name}.aar"
+                output.outputFileName = fileName
+            }
+        }
     }
 }
 

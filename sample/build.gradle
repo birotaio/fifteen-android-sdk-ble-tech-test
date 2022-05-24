@@ -3,6 +3,23 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+def githubProperties = new Properties()
+def githubPropertiesFiles = rootProject.file("github.properties")
+
+if (githubPropertiesFiles.exists())
+    githubProperties.load(new FileInputStream(githubPropertiesFiles))
+
+repositories {
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/birotaio/fifteen-android-sdk-ble-tech-test")
+        credentials {
+            username = githubProperties['gpr.usr'] ?: System.getenv("GPR_USER")
+            password = githubProperties['gpr.key'] ?: System.getenv("GPR_API_KEY")
+        }
+    }
+}
+
 android {
     compileSdk 32
 
@@ -44,5 +61,5 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
-    implementation project(path: ':sdkble')
+    implementation 'io.birota.zoov.sdkble:sdkble:1.0.0'
 }
