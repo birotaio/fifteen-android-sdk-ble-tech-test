@@ -41,5 +41,5 @@ repositories {
 Add the dependency :
 
 ```
-implementation 'io.birota.zoov.sdkble:sdkble:1.0.0'
+implementation 'io.birota.zoov.sdkble:sdkble:1.0.1'
 ```

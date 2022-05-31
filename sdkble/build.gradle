@@ -7,7 +7,7 @@ plugins {
 ext {
     versionMajor = '1'
     versionMinor = '0'
-    versionBugfix = '0'
+    versionBugfix = '1'
     versionExtra = ''
 }
 

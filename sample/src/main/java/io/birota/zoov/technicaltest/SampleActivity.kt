@@ -22,24 +22,24 @@ class SampleActivity : AppCompatActivity() {
                 FakeSdkBLE.connect(serialNumber = it, onSuccess = {
                     Toast.makeText(this, "Connection Success", Toast.LENGTH_LONG).show()
                 }, onError = {
-                    Toast.makeText(this, "Connection failed ${it.name}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Connection Fail ${it.name}", Toast.LENGTH_LONG).show()
                 })
             }
         }
 
         binding.buttonStart.setOnClickListener {
-            FakeSdkBLE.startTrip(onSuccess = {
+            FakeSdkBLE.unlockBike(onSuccess = {
                 Toast.makeText(this, "Start Success", Toast.LENGTH_LONG).show()
             }, onError = {
-                Toast.makeText(this, "Start failed ${it.name}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Start Fail ${it.name}", Toast.LENGTH_LONG).show()
             })
         }
 
         binding.buttonEnd.setOnClickListener {
-            FakeSdkBLE.endTrip(onSuccess = {
-                Toast.makeText(this, "End Success", Toast.LENGTH_LONG).show()
+            FakeSdkBLE.lockBike(onSuccess = {
+                Toast.makeText(this, "Lock Success", Toast.LENGTH_LONG).show()
             }, onError = {
-                Toast.makeText(this, "End failed ${it.name}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Lock Fail ${it.name}", Toast.LENGTH_LONG).show()
             })
         }
 
@@ -49,17 +49,17 @@ class SampleActivity : AppCompatActivity() {
 
         FakeSdkBLE.bikeData.observe(this) { bikeData ->
             bikeData?.let {
-                binding.textViewInfo.text = "Serial number = ${it.serialNumber}, Battery Level = ${it.batteryLevel}, In Trip = ${it.inTrip}, Is Connected = ${it.isConnected}"
+                binding.textViewInfo.text = "Serial number = ${it.serialNumber}, Battery Level = ${it.batteryLevel}, In Trip = ${it.isLocked}, Is Connected = ${it.isConnected}"
             } ?: run {
                 binding.textViewInfo.text = "No bike connected"
             }
         }
     }
 
-    private fun getSerialNumber(): Int? {
-        val serialNumber = binding.editTextNumber.text.toString().toIntOrNull()
+    private fun getSerialNumber(): String? {
+        val serialNumber = binding.editTextNumber.text.toString()
 
-        return if (serialNumber == null) {
+        return if (serialNumber.isNullOrBlank()) {
             Toast.makeText(this, "Serial number not valid", Toast.LENGTH_LONG).show()
             null
         } else

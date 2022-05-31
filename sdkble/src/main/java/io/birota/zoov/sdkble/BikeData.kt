@@ -1,3 +1,3 @@
 package io.birota.zoov.sdkble
 
-data class BikeData(val serialNumber:Int, val batteryLevel: Int, val isConnected: Boolean, val inTrip: Boolean)
+data class BikeData(val serialNumber: String, val batteryLevel: Int, val isConnected: Boolean, val isLocked: Boolean)

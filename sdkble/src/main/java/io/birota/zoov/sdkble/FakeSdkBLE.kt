@@ -13,25 +13,23 @@ object FakeSdkBLE {
         private set
         get() = mBikeData
 
-    fun connect(serialNumber: Int, onSuccess: (() -> Unit), onError: ((ErrorSdkBle) -> Unit)) {
+    fun connect(serialNumber: String, onSuccess: (() -> Unit), onError: ((ErrorSdkBle) -> Unit)) {
+        val bikeDataValue = mBikeData.value
+        if (bikeDataValue != null)
+            return onError.invoke(ErrorSdkBle.AlreadyConnected)
         val handler = Handler(Looper.getMainLooper())
         val r = Runnable {
-            val bikeDataValue = mBikeData.value
-            if (bikeDataValue != null)
-                onError.invoke(ErrorSdkBle.AlreadyConnected)
+            val random = Random(System.currentTimeMillis()).nextInt(1, 11)
+            if (random < 3)
+                onError.invoke(ErrorSdkBle.BluetoothError)
             else {
-                val random = Random(System.currentTimeMillis()).nextInt(1, 11)
-                if (random < 3)
-                    onError.invoke(ErrorSdkBle.BluetoothError)
-                else {
-                    mBikeData.postValue(BikeData(
-                        serialNumber = serialNumber,
-                        batteryLevel = (5..100).random(),
-                        isConnected = true,
-                        inTrip = false
-                    ))
-                    onSuccess.invoke()
-                }
+                mBikeData.postValue(BikeData(
+                    serialNumber = serialNumber,
+                    batteryLevel = (5..100).random(),
+                    isConnected = true,
+                    isLocked = true
+                ))
+                onSuccess.invoke()
             }
         }
         handler.postDelayed(r, 1000)
@@ -41,53 +39,51 @@ object FakeSdkBLE {
         mBikeData.postValue(null)
     }
 
-    fun startTrip(onSuccess: (() -> Unit), onError: ((ErrorSdkBle) -> Unit)) {
+    fun unlockBike(onSuccess: (() -> Unit), onError: ((ErrorSdkBle) -> Unit)) {
+        val bikeDataValue = mBikeData.value
+        if (bikeDataValue?.isConnected != true)
+            return onError.invoke(ErrorSdkBle.NotConnected)
+        else if (!bikeDataValue.isLocked)
+            return onError.invoke(ErrorSdkBle.AlreadyUnlocked)
+
         val handler = Handler(Looper.getMainLooper())
         val r = Runnable {
-            val bikeDataValue = mBikeData.value
-            if (bikeDataValue?.isConnected != true)
-                onError.invoke(ErrorSdkBle.NotConnected)
-            else if (bikeDataValue.inTrip)
-                onError.invoke(ErrorSdkBle.AlreadyInTrip)
+            val random = Random(System.currentTimeMillis()).nextInt(1, 11)
+            if (random < 2)
+                onError.invoke(ErrorSdkBle.BluetoothError)
             else {
-                val random = Random(System.currentTimeMillis()).nextInt(1, 11)
-                if (random < 2)
-                    onError.invoke(ErrorSdkBle.BluetoothError)
-                else {
-                    mBikeData.postValue(BikeData(
-                        serialNumber = bikeDataValue.serialNumber,
-                        batteryLevel = bikeDataValue.batteryLevel,
-                        isConnected = true,
-                        inTrip = true
-                    ))
-                    onSuccess.invoke()
-                }
+                mBikeData.postValue(BikeData(
+                    serialNumber = bikeDataValue.serialNumber,
+                    batteryLevel = bikeDataValue.batteryLevel,
+                    isConnected = true,
+                    isLocked = false
+                ))
+                onSuccess.invoke()
             }
         }
         handler.postDelayed(r, 1000)
     }
 
-    fun endTrip(onSuccess: (() -> Unit), onError: ((ErrorSdkBle) -> Unit)) {
+    fun lockBike(onSuccess: (() -> Unit), onError: ((ErrorSdkBle) -> Unit)) {
+        val bikeDataValue = mBikeData.value
+        if (bikeDataValue?.isConnected != true)
+            return onError.invoke(ErrorSdkBle.NotConnected)
+        else if (bikeDataValue.isLocked)
+            return onError.invoke(ErrorSdkBle.AlreadyLocked)
+
         val handler = Handler(Looper.getMainLooper())
         val r = Runnable {
-            val bikeDataValue = mBikeData.value
-            if (bikeDataValue?.isConnected != true)
-                onError.invoke(ErrorSdkBle.NotConnected)
-            else if (!bikeDataValue.inTrip)
-                onError.invoke(ErrorSdkBle.NotInTrip)
+            val random = Random(System.currentTimeMillis()).nextInt(1, 11)
+            if (random < 2)
+                onError.invoke(ErrorSdkBle.BluetoothError)
             else {
-                val random = Random(System.currentTimeMillis()).nextInt(1, 11)
-                if (random < 2)
-                    onError.invoke(ErrorSdkBle.BluetoothError)
-                else {
-                    mBikeData.postValue(BikeData(
-                        serialNumber = bikeDataValue.serialNumber,
-                        batteryLevel = bikeDataValue.batteryLevel,
-                        isConnected = true,
-                        inTrip = false
-                    ))
-                    onSuccess.invoke()
-                }
+                mBikeData.postValue(BikeData(
+                    serialNumber = bikeDataValue.serialNumber,
+                    batteryLevel = bikeDataValue.batteryLevel,
+                    isConnected = true,
+                    isLocked = true
+                ))
+                onSuccess.invoke()
             }
         }
         handler.postDelayed(r, 1000)
@@ -96,8 +92,8 @@ object FakeSdkBLE {
     enum class ErrorSdkBle {
         AlreadyConnected,
         NotConnected,
-        AlreadyInTrip,
-        NotInTrip,
+        AlreadyUnlocked,
+        AlreadyLocked,
         BluetoothError
     }
 }
