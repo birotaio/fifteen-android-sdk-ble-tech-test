@@ -49,7 +49,7 @@ class SampleActivity : AppCompatActivity() {
 
         FakeSdkBLE.bikeData.observe(this) { bikeData ->
             bikeData?.let {
-                binding.textViewInfo.text = "Serial number = ${it.serialNumber}, Battery Level = ${it.batteryLevel}, In Trip = ${it.isLocked}, Is Connected = ${it.isConnected}"
+                binding.textViewInfo.text = "Serial number = ${it.serialNumber}, Battery Level = ${it.batteryLevel}, Is Locked = ${it.isLocked}, Is Connected = ${it.isConnected}"
             } ?: run {
                 binding.textViewInfo.text = "No bike connected"
             }
